@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Repositories\VisitorRepository;
-use App\Transformers\VisitorTransformer;
 use Illuminate\Http\Request;
+use App\Repositories\VisitorRepository;
 
 class VisitorController extends ApiController
 {
@@ -20,11 +19,11 @@ class VisitorController extends ApiController
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
-        return $this->respondWithPaginator($this->visitor->page(), new VisitorTransformer);
+        return $this->response->collection($this->visitor->pageWithRequest($request));
     }
 
 }

@@ -20,7 +20,7 @@ class ArticleTransformer extends TransformerAbstract
             'subtitle'          => $article->subtitle,
             'user'              => $article->user,
             'slug'              => $article->slug,
-            'content'           => collect(json_decode($article->content))->get('raw'),
+            'content'           => $article->content['raw'],
             'page_image'        => $article->page_image,
             'meta_description'  => $article->meta_description,
             'is_original'       => $article->is_original,
@@ -39,9 +39,9 @@ class ArticleTransformer extends TransformerAbstract
      */
     public function includeCategory(Article $article)
     {
-        $category = $article->category;
-
-        return $this->item($category, new CategoryTransformer);
+        if ($category = $article->category) {
+            return $this->item($category, new CategoryTransformer);
+        }
     }
 
     /**
@@ -52,8 +52,8 @@ class ArticleTransformer extends TransformerAbstract
      */
     public function includeTags(Article $article)
     {
-        $tags = $article->tags;
-
-        return $this->collection($tags, new TagTransformer);
+        if ($tags = $article->tags) {
+            return $this->collection($tags, new TagTransformer);
+        }
     }
 }

@@ -43,6 +43,16 @@ Here is [documents](https://manual.pigjian.com/)
 
 [PJ Blog](https://github.com/jcc/blog) Laravel 5.*
 
+## Server Requirements
+
+- PHP >= 7.1.0
+- Node >= 6.x
+- OpenSSL PHP Extension
+- PDO PHP Extension
+- Mbstring PHP Extension
+- Tokenizer PHP Extension
+- XML PHP Extension
+
 ## Preview
 
 ![New Blog](https://pigjian.com/uploads/post_img/2016-12-27/newblog1.jpeg)
@@ -114,6 +124,11 @@ php artisan blog:install
 - [overtrue](https://github.com/overtrue)
 - [Laravist](https://www.laravist.com/)
 - [Laravel - China](https://laravel-china.org/)
+
+## Donate
+
+Support all ERC20 tokens. My Address:
+**0x600dfF1311E5DA3a8697fD86d4Fd9bed257395eb**
 
 ## License
 

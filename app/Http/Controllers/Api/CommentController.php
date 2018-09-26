@@ -6,7 +6,6 @@ use Auth;
 use Illuminate\Http\Request;
 use App\Http\Requests\CommentRequest;
 use App\Repositories\CommentRepository;
-use App\Transformers\CommentTransformer;
 use App\Notifications\ReceivedComment as Received;
 
 class CommentController extends ApiController
@@ -16,25 +15,26 @@ class CommentController extends ApiController
     public function __construct(CommentRepository $comment)
     {
         parent::__construct();
-        
+
         $this->comment = $comment;
     }
 
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
-        return $this->respondWithPaginator($this->comment->page(), new CommentTransformer);
+        return $this->response->collection($this->comment->pageWithRequest($request));
     }
 
     /**
      * Store a newly created resource in storage.
      *
      * @param  \App\Http\Requests\CommentRequest  $request
-     * @return \Illuminate\Http\Response
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(CommentRequest $request)
     {
@@ -42,36 +42,40 @@ class CommentController extends ApiController
             'user_id' => Auth::user()->id
         ]);
 
+        $data['content'] = $data['content'];
+
         $comment = $this->comment->store($data);
 
         $comment->commentable->user->notify(new Received($comment));
 
-        return $this->respondWithItem($comment, new CommentTransformer);
+        return $this->response->item($comment);
     }
 
     /**
      * Display the specified resource.
      *
      * @param  int  $commentableId
-     * @return \Illuminate\Http\Response
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show(Request $request, $commentableId)
     {
         $commentableType = $request->get('commentable_type');
         $comments = $this->comment->getByCommentable($commentableId, $commentableType);
 
-        return $this->respondWithCollection($comments, new CommentTransformer);
+        return $this->response->collection($comments);
     }
 
     /**
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function edit($id)
     {
-        return $this->respondWithItem($this->comment->getById($id), new CommentTransformer);
+        return $this->response->item($this->comment->getById($id));
     }
 
     /**
@@ -83,16 +87,21 @@ class CommentController extends ApiController
      */
     public function update(CommentRequest $request, $id)
     {
-        $this->comment->update($id, $request->all());
+        $data = $request->all();
 
-        return $this->noContent();
+        $data['content'] = $data['content'];
+
+        $this->comment->update($id, $data);
+
+        return $this->response->withNoContent();
     }
 
     /**
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id)
     {
@@ -100,6 +109,6 @@ class CommentController extends ApiController
 
         $this->comment->destroy($id);
 
-        return $this->noContent();
+        return $this->response->withNoContent();
     }
 }

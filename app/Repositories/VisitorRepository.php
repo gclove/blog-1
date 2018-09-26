@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Services\IP;
+use App\Tools\IP;
 use App\Visitor;
 
 class VisitorRepository
@@ -29,6 +29,29 @@ class VisitorRepository
         $this->model = $visitor->with('article');
 
         $this->ip = $ip;
+    }
+
+    /**
+     * Get number of the records.
+     *
+     * @param  Request $request
+     * @param  integer $number
+     * @param  string  $sort
+     * @param  string  $sortColumn
+     * @return collection
+     */
+    public function pageWithRequest($request, $number = 10, $sort = 'desc', $sortColumn = 'created_at')
+    {
+        $keyword = $request->get('keyword');
+
+        return $this->model
+                    ->when($keyword, function ($query) use ($keyword) {
+                        $query->where('ip', $keyword)
+                            ->orWhereHas('article', function ($query) use ($keyword) {
+                                $query->where('title', 'like', "%{$keyword}%");
+                            });
+                    })
+                    ->orderBy($sortColumn, $sort)->paginate($number);
     }
 
     /**
@@ -73,7 +96,7 @@ class VisitorRepository
 
     /**
      * Get all the clicks.
-     * 
+     *
      * @return int
      */
     public function getAllClicks()

@@ -3,7 +3,7 @@
 namespace App;
 
 use App\Scopes\DraftScope;
-use App\Services\Markdowner;
+use App\Tools\Markdowner;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -36,6 +36,10 @@ class Article extends Model
         'is_draft',
         'is_original',
         'published_at',
+    ];
+
+    protected $casts = [
+        'content'    =>    'array'
     ];
 
     /**
@@ -113,17 +117,17 @@ class Article extends Model
 
     /**
      * Set the title and the readable slug.
-     * 
+     *
      * @param string $value
      */
     public function setTitleAttribute($value)
     {
         $this->attributes['title'] = $value;
 
-        if (!config('services.youdao.key') || !config('services.youdao.from')) {
-            $this->setUniqueSlug($value, '');
+        if (!config('services.youdao.appKey') || !config('services.youdao.appSecret')) {
+            $this->setUniqueSlug($value, str_random(5));
         } else {
-            $this->attributes['slug'] = translug($value);
+            $this->setUniqueSlug(translug($value), '');
         }
     }
 
@@ -135,10 +139,12 @@ class Article extends Model
      */
     public function setUniqueSlug($value, $extra) {
         $slug = str_slug($value.'-'.$extra);
+
         if (static::whereSlug($slug)->exists()) {
             $this->setUniqueSlug($slug, (int) $extra + 1);
             return;
         }
+
         $this->attributes['slug'] = $slug;
     }
 
